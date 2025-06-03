@@ -1,0 +1,7 @@
+[project]
+name = "pyjson_magic"
+version = "0.1.0"
+description = "A Python package for advanced JSON manipulation with magic methods"
+
+[options]
+packages = ["pyjson_magic"]
