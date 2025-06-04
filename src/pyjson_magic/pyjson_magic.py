@@ -88,6 +88,10 @@ def __override_json_decoder(self, dct: Any) -> object:
             # Return the instance.
             return instance
 
+        elif isinstance(dct, list):
+            # If the value is a list, recursively deserialize each item in the list.
+            return [_internal(item) for item in dct]
+
         return dct
 
     dct = self.original_decode(dct)

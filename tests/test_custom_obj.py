@@ -67,3 +67,15 @@ class TestCustomObj(TestCase):
         parsed = json.loads(c_serialized)
         print(parsed, "\n", C(c=1, d=""))
         assert parsed == C(c=1, d="test")
+
+    def test_top_level_list(self):
+        a = A()
+        b = B()
+        top_level_list = [a, b]
+        serialized = json.dumps(top_level_list)
+        deserialized = json.loads(serialized)
+
+        assert len(deserialized) == 2
+        assert isinstance(deserialized[0], A) and isinstance(deserialized[1], B)
+        assert deserialized[0] == a
+        assert deserialized[1] == b
