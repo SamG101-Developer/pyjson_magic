@@ -47,8 +47,13 @@ def __override_json_encoder(self, obj: object) -> dict:
     type_info = {"__type__": fully_qualified_type}
 
     # If the object has a __json__ method, call it to get the serialized representation.
-    if hasattr(obj, "__json__"):
+    if hasattr(obj, "__json__") and not isinstance(obj, type):
         return type_info | obj.__json__()
+
+    # If the "__json__" is present for a type of a class, we can serialize it as a dictionary.
+    elif type(object) is type:
+        fully_qualified_type = f"{obj.__module__}.{obj.__name__}"
+        return type_info | {"__inner_type__": fully_qualified_type}
 
     # If the object does not have a __json__ method, raise a TypeError to indicate that it cannot be serialized.
     else:
@@ -77,7 +82,18 @@ def __override_json_decoder(self, dct: Any) -> object:
                 raise TypeError(f"Could not find class {type_name} for deserialization: {e}")
 
             # Create the class but bypass the __init__ method to avoid issues with missing attributes.
-            instance = cls.__new__(cls)
+            if type_name != "builtins.type":
+                instance = cls.__new__(cls)
+            else:
+                # Get the inner type
+                try:
+                    type_name = dct.pop("__inner_type__")
+                    module_name, class_name = type_name.rsplit(".", 1)
+                    module = __import__(module_name, fromlist=[class_name])
+                    cls = getattr(module, class_name)
+                except (ImportError, AttributeError) as e:
+                    raise TypeError(f"Could not find class {type_name} for deserialization: {e}")
+                instance = cls
 
             # Add all the attributes from the dictionary to the instance.
             for key, value in dct.items():

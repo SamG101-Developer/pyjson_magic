@@ -33,6 +33,12 @@ class C:
         return {"c": self.c}
 
 
+@pyjson_magic.auto_json
+@dataclass(eq=True)
+class D:
+    types: list[type] = field(default_factory=lambda: [A, B])
+
+
 class TestCustomObj(TestCase):
     @classmethod
     def setUpClass(cls):
@@ -79,3 +85,10 @@ class TestCustomObj(TestCase):
         assert isinstance(deserialized[0], A) and isinstance(deserialized[1], B)
         assert deserialized[0] == a
         assert deserialized[1] == b
+
+    def test_type_attribute(self):
+        d = D()
+        serialized = json.dumps(d)
+        deserialized = json.loads(serialized)
+
+        assert deserialized == d
