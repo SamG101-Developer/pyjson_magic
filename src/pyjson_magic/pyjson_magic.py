@@ -51,7 +51,7 @@ def __override_json_encoder(self, obj: object) -> dict:
         return type_info | obj.__json__()
 
     # If the "__json__" is present for a type of a class, we can serialize it as a dictionary.
-    elif type(object) is type:
+    elif type(obj) is type:
         fully_qualified_type = f"{obj.__module__}.{obj.__name__}"
         return type_info | {"__inner_type__": fully_qualified_type}
 
